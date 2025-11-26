@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: xwear_user           
+      POSTGRES_PASSWORD: xwear_pw   
+      POSTGRES_DB: xwear_db         
+    ports:
+      - "5432:5432"                   
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    image: node:18                    
+    container_name: nestjs_app
+    restart: always
+    working_dir: /usr/src/app
+    volumes:
+      - ./xwear-backend:/usr/src/app               
+    ports:
+      - "3001:3001"                   
+    depends_on:
+      - db
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: "postgresql://xwear_user:xwear_pw@db:5432/xwear_db?schema=public"
+    command: sh -c "npm run start:dev"
+
+  client:
+    image: node:18
+    container_name: nextjs_app
+    restart: always
+    working_dir: /usr/src/app
+    volumes:
+      - ./xwear-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - app
+    environment:
+      NODE_ENV: development
+    command: sh -c "npm run dev"
+
+volumes:
+  db_data:
