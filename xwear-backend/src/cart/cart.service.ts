@@ -6,12 +6,12 @@ export class CartService {
     constructor(private readonly prisma: PrismaService) {
     }
 
-    async create(id: number, user_id: number) {
+    async create(id: number, size_id: number, user_id: number) {
         await this.prisma.cart.create({
             data: {
                 userId: user_id,
                 productId: id,
-                productSizeId: 1,
+                productSizeId: size_id,
             },
         });
         return await this.findAll(user_id);
@@ -25,16 +25,17 @@ export class CartService {
                 },
                 include: {
                     product: true,
+                    productSize: true,
                 },
             }),
             total:
                 (
-                    await this.prisma.product.aggregate({
+                    await this.prisma.productSize.aggregate({
                         _sum: {
                             price: true,
                         },
                         where: {
-                            Cart: {
+                            carts: {
                                 some: {
                                     userId: user_id,
                                 },

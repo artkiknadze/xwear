@@ -12,9 +12,10 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { OrderModule } from './order/order.module';
 import { AuthModule } from './auth/auth.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
-  imports: [ProductsModule, PrismaModule, UsersModule, CartModule, WishlistModule, OrderModule, AuthModule, ReviewsModule],
+  imports: [ProductsModule, PrismaModule, UsersModule, CartModule, WishlistModule, OrderModule, AuthModule, ReviewsModule, StripeModule],
   controllers: [AppController],
   providers: [AppService, CartService, OrderService, WishlistService],
 })

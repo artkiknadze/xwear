@@ -52,8 +52,10 @@ export default function CheckoutPage() {
 
   const confirmOrder = () => {
     api.post("/order").then((res) => {
-      alert("Замовлення успішно оформлено!");
-      router.push("/");
+      console.log(res.data)
+      router.push(res.data.checkoutUrl);
+      // alert("Замовлення успішно оформлено!");
+      // router.push("/");
     });
   };
 
@@ -320,10 +322,10 @@ export default function CheckoutPage() {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold">{item.product.title}</h3>
                 <p className="text-sm text-gray-500">
-                  {item.product.price.toLocaleString("uk-UA", {
+                  {item.productSize.price.toLocaleString("uk-UA", {
                     style: "currency",
                     currency: "UAH",
-                  })}
+                  })} / {item.productSize.size} розмір
                 </p>
               </div>
             </div>

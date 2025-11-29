@@ -57,6 +57,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     api.get("/order/").then((response) => {
+      console.log(response.data);
       setData(response.data);
     });
   }, []);

@@ -22,13 +22,21 @@ export class ReviewsService {
   async findAll(product_id: number) {
     return await this.prisma.review.findMany({
       where: { productId: product_id },
-      include: { user: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          }
         }
-      } },
+      },
+    });
+  }
+
+  async findUsersReview(product_id: number, user_id: number) {
+    return await this.prisma.review.findFirst({
+      where: { productId: product_id, userId: user_id },
     });
   }
 
@@ -36,8 +44,14 @@ export class ReviewsService {
     return `This action returns a #${id} review`;
   }
 
-  update(id: number, updateReviewDto: UpdateReviewDto) {
-    return `This action updates a #${id} review`;
+  update(id: number, updateReviewDto: UpdateReviewDto, user_id: number) {
+    return this.prisma.review.updateMany({
+      where: { userId: user_id, productId: id },
+      data: {
+        rating: updateReviewDto.rating,
+        comment: updateReviewDto.comment,
+      },
+    })
   }
 
   remove(id: number) {

@@ -50,7 +50,8 @@ function ThumbnailPlugin(
 
 const Reviews = ({ reviews, productId }: { reviews: any[]; productId: number }) => {
   const [comment, setComment] = useState("");
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState(0);
+  const [reviewExists, setReviewExists] = useState(false);
 
   const addReview = async () => {
     api
@@ -61,13 +62,46 @@ const Reviews = ({ reviews, productId }: { reviews: any[]; productId: number }) 
       })
       .then((res) => {
         alert("Відгук додано!");
+        window.location.reload();
       });
   }
+
+  const updateReview = async () => {
+    api
+      .patch("/reviews/" + productId, {
+        rating: rating,
+        comment: comment,
+      })
+      .then((res) => {
+        alert("Відгук оновлено!");
+        window.location.reload();
+      });
+  }
+
+  useEffect(() => {
+    api.get("/reviews/user-review/" + productId).then((res) => {
+      if (res.data) {
+        setRating(res.data.rating);
+        setComment(res.data.comment);
+        setReviewExists(true);
+      }
+    });
+  }, [productId]);
 
   return <div>
     <h2 className="text-2xl font-bold mt-16 mb-6">Відгуки</h2>
     <div className="mb-3">
-      <Input title="Ваша оцінка (1-5)" type="number" value={rating} onChange={(e) => setRating(Number(e.target.value))}></Input>
+      <span className="mr-2">{reviewExists ? "Редагувати" : "Ваш"} відгук:</span>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          className={`text-2xl ${star <= rating ? "text-yellow-500" : "text-gray-300"
+            }`}
+          onClick={() => setRating(star)}
+        >
+          ★
+        </button>
+      ))}
       <textarea
         className="bg-gray-100 focus:outline-none w-full my-3 p-3 rounded-md"
         rows={4}
@@ -75,13 +109,14 @@ const Reviews = ({ reviews, productId }: { reviews: any[]; productId: number }) 
         value={comment}
         onChange={(e) => setComment(e.target.value)}
       ></textarea>
-      <button className="flex w-fit bg-black text-white font-semibold py-4 px-6 rounded-md" onClick={addReview}>Додати відгук</button>
+      <button className="flex w-fit bg-black text-white font-semibold py-4 px-6 rounded-md" onClick={reviewExists ? updateReview : addReview}>{reviewExists ? "Оновити" : "Додати"} відгук</button>
     </div>
+
     <div className="grid gap-3">
       {reviews.map((review, index) => (
         <div key={index} className="border rounded-md p-4">
           <div className="flex items-center mb-2">
-            <div className="font-semibold mr-4">{review.user.firstName} {review.user.lastName}</div>
+            <div className="font-semibold mr-4">{review.user.firstName || 'Анонім'} {review.user.lastName || 'Користувач'}</div>
             <div className="text-yellow-500">
               {'★'.repeat(review.rating)}
             </div>
@@ -90,7 +125,7 @@ const Reviews = ({ reviews, productId }: { reviews: any[]; productId: number }) 
         </div>
       ))}
     </div>
-  </div>;
+  </div >;
 }
 
 export default function ProductPage() {
@@ -108,7 +143,7 @@ export default function ProductPage() {
 
   const addToCart = async () => {
     api
-      .post("/cart/" + data.id)
+      .post("/cart/" + data.id, { size_id: selectedSize.id })
       .then((res) => {
         alert("Товар додано до кошика!");
       });
@@ -124,24 +159,25 @@ export default function ProductPage() {
 
   useEffect(() => {
     api.get("/products/" + params?.id).then((res) => {
-      setData(res.data);
       console.log(res.data);
+      setData(res.data);
+      setSizes(res.data.productSizes);
       setSelectedSize({
-        size: "36",
-        price: res.data.price,
+        id: res.data.productSizes[0].id,
+        size: res.data.productSizes[0].size,
+        price: res.data.productSizes[0].price,
       });
     });
   }, [params?.id]);
 
-  const sizes = SIZES.map((size) => ({
-    size,
-    price: data?.price,
-  }));
+  const [sizes, setSizes] = useState();
+  // const sizes = SIZES.map((size) => ({
+  //   size,
+  //   price: data?.price,
+  // }));
 
-  const [selectedSize, setSelectedSize] = useState<{
-    size: string;
-    price: number;
-  }>({
+  const [selectedSize, setSelectedSize] = useState({
+    id: 0,
     size: "0",
     price: 0,
   });
@@ -217,24 +253,24 @@ export default function ProductPage() {
               Розміри (EU):
             </span>
             <div className="grid grid-cols-4 gap-2">
-              {sizes.map((s) => (
-                <button
-                  key={s.size}
-                  onClick={() => setSelectedSize(s)}
-                  className={`text-sm border rounded-md py-2 px-4 text-center ${selectedSize.size === s.size
-                    ? "bg-blue-400 text-white border-blue-500"
-                    : "border-gray-300 hover:bg-gray-50"
-                    }`}
-                >
-                  <div className="font-medium">{s.size}</div>
-                  <div
-                    className={`text-xs ${selectedSize.size === s.size
-                      ? "text-white"
-                      : "text-gray-500"
+              {
+                data.productSizes?.map((s: any) => (
+                  <button
+                    key={s.size}
+                    onClick={() => setSelectedSize(s)}
+                    className={`text-sm border rounded-md py-2 px-4 text-center ${selectedSize.size === s.size
+                      ? "bg-blue-400 text-white border-blue-500"
+                      : "border-gray-300 hover:bg-gray-50"
                       }`}
-                  ></div>
-                </button>
-              ))}
+                  >
+                    <div className="font-medium">{s.size}</div>
+                    <div
+                      className={`text-xs ${selectedSize.size === s.size
+                        ? "text-white"
+                        : "text-gray-500"
+                        }`}
+                    ></div>
+                  </button>))}
             </div>
           </div>
 

@@ -25,9 +25,12 @@ services:
       - "3001:3001"                   
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
       NODE_ENV: development
       DATABASE_URL: "postgresql://xwear_user:xwear_pw@db:5432/xwear_db?schema=public"
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
     command: sh -c "npm run start:dev"
 
 volumes:

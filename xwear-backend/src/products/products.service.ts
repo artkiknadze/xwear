@@ -50,6 +50,12 @@ const RANDOM_COLORS = [
     'Brown',
 ];
 
+const SIZE = {
+    'clothes': [ 'XS', 'S', 'M', 'L', 'XL', 'XXL' ],
+    'shoes': [37, 38, 39, 40, 41, 42, 43, 44],
+    'accessories': ['Default'],
+}
+
 @Injectable()
 export class ProductsService {
     constructor(private readonly prisma: PrismaService) {
@@ -97,13 +103,11 @@ export class ProductsService {
         const products = await fetch('https://dummyjson.com/products?limit=194');
         const data = await products.json();
 
-        data.products.forEach(async (product) => {
+        for (const product of data.products) {
             if (!ALLOWED_CATEGORIES[product.category]) {
-                return;
+                continue;
             }
             product.category = ALLOWED_CATEGORIES[product.category];
-
-            const sizes = [37, 37.5, 38, 38.5, 39, 39.5, 40, 40.5, 41, 41.5, 42, 42.5, 43, 43.5, 44];
 
             await this.prisma.product.create({
                 data: {
@@ -123,22 +127,22 @@ export class ProductsService {
                 },
             });
 
-            for (let i = 0; i <= Math.floor(Math.random() * sizes.length); i++) {
+            for (let i = 0; i <= Math.floor(Math.random() * SIZE[product.category].length); i++) {
                 await this.prisma.productSize.create({
                     data: {
                         price: Math.floor(product.price) + (i * 10) + 0.99,
-                        size: `${sizes[i]}`,
+                        size: `${SIZE[product.category][i]}`,
                         productId: product.id,
                     }
                 })
             }
-        });
+        }
 
         return 'OK';
     }
 
     async findOne(id: number) {
-        return await this.prisma.product.findUnique({
+        return this.prisma.product.findUnique({
             where: {id},
             include: {
                 reviews: {include: {user: {select: {id: true, firstName: true, lastName: true}}}},

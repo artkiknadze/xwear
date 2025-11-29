@@ -7,13 +7,13 @@ export class ProductsController {
 
   @Get()
   async findAll(@Req() req: any) {
-    return await this.productsService.findAll({
-      category: req.query.category,
-      collection: req.query.collection,
-      model: req.query.model,
-      color: req.query.color,
-      minPrice: req.query.minPrice,
-      maxPrice: req.query.maxPrice,
+    return this.productsService.findAll({
+        category: req.query.category,
+        collection: req.query.collection,
+        model: req.query.model,
+        color: req.query.color,
+        minPrice: req.query.minPrice,
+        maxPrice: req.query.maxPrice,
     });
   }
 

@@ -10,6 +10,7 @@ const ArticleItem = ({
   price,
   title,
   onDelete,
+  productSize,
 }: {
   id: number;
   productId: string;
@@ -17,6 +18,7 @@ const ArticleItem = ({
   price: number;
   title: string;
   onDelete: (i: number) => void;
+  productSize?: string;
 }) => (
   <div className="flex items-center border border-gray-200 rounded-lg p-4 mb-4">
     <img src={image} alt={title} className="w-16 h-16 mr-4" />
@@ -25,6 +27,7 @@ const ArticleItem = ({
         {title}
       </a>
       <p className="text-gray-500">{price} грн</p>
+      <div className="text-gray-500">Розмір: {productSize}</div>
     </div>
     <button
       onClick={() => onDelete(id)}
@@ -40,6 +43,7 @@ export default function CartPage() {
 
   useEffect(() => {
     api.get("/cart").then((res) => {
+      console.log(res.data);
       setData(res.data);
     });
   }, []);
@@ -61,8 +65,9 @@ export default function CartPage() {
             productId={item.product.id}
             onDelete={deleteItem}
             image={item.product.images[0]}
-            price={item.product.price}
+            price={item.productSize.price}
             title={item.product.title}
+            productSize={item.productSize.size}
           />
         ))}
       </div>

@@ -37,10 +37,10 @@ const Order = ({ order }: { order: any }) => {
           </tr>
         </thead>
         <tbody>
-          {order.products.map((item: any, index: number) => (
+          {order.items.map((item: any, index: number) => (
             <tr key={index} className="border-b">
-              <td className="py-4">{item.title}</td>
-              <td className="py-4 text-right">{item.price} ₴</td>
+              <td className="py-4">{item.product.title}</td>
+              <td className="py-4 text-right">{item.productSize.price} ₴</td>
             </tr>
           ))}
         </tbody>
