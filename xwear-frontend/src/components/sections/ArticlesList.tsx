@@ -1,5 +1,6 @@
 "use client";
 import { ArticleCard, ArticleCardProps } from "@/components/ui/ArticleCard";
+import { ar } from "@faker-js/faker";
 import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -45,6 +46,11 @@ export const ArticlesList: React.FC<ArticlesListProps> = ({
     },
   });
 
+  React.useEffect(() => {
+    instanceRef.current?.update();
+  }, [instanceRef, articles]);
+
+
   return (
     <div className="m-8">
       <div className="flex justify-between items-center mb-5">
@@ -66,12 +72,11 @@ export const ArticlesList: React.FC<ArticlesListProps> = ({
         ))}
       </div>
 
-      {instanceRef.current && (
+      {instanceRef.current && instanceRef.current.track.details && (
         <div className="flex justify-center mt-4 space-x-2">
           {loaded &&
-            instanceRef.current.track.details &&
             Array.from(
-              Array(instanceRef.current.track.details.slides.length - 3).keys()
+              Array(instanceRef.current?.track.details.slides.length - 3).keys()
             ).map((idx) => (
               <button
                 key={idx}

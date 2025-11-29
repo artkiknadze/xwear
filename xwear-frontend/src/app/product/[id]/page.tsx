@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { KeenSliderInstance, KeenSliderPlugin } from "keen-slider";
 import { useKeenSlider } from "keen-slider/react";
 import Image from "next/image";
-import { MutableRefObject, useEffect, useState } from "react";
+import React, { MutableRefObject, useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -207,6 +207,12 @@ export default function ProductPage() {
     }
     : {};
 
+
+  React.useEffect(() => {
+    instanceRef.current?.update();
+  }, [instanceRef, data.images]);
+
+
   return (
     <Container>
       <div className="flex flex-col md:flex-row gap-10 py-10">
@@ -231,6 +237,7 @@ export default function ProductPage() {
               <div
                 key={i}
                 className="keen-slider__slide gap-4 border-b !max-w-[80px] !min-w-[80px]"
+                onClick={() => instanceRef.current?.moveToIdx(i)}
               >
                 <Image
                   key={i}
