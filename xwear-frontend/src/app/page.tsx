@@ -59,17 +59,17 @@ export default function Home() {
             <Banner/>
             <ArticlesList
                 title="Взуття"
-                href="/catalog?category=mens-shirts"
+                href="/catalog?category=shoes"
                 articles={shoesData}
             />
             <ArticlesList
                 title="Одяг"
-                href="/catalog?category=mens-shoes"
+                href="/catalog?category=clothes"
                 articles={clothesData}
             />
             <ArticlesList
                 title="Аксесуари"
-                href="/catalog?category=womens-watches"
+                href="/catalog?category=accessories"
                 articles={accessoriesData}
             />
         </Container>
