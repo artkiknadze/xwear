@@ -20,6 +20,7 @@ export default function CheckoutPage() {
     zip: "",
     email: "",
     phone: "",
+    promoCode: "",
   });
 
   const [deliveryService, setDeliveryService] = useState<string>("");
@@ -46,16 +47,23 @@ export default function CheckoutPage() {
         zip: res.data.zip || "",
         email: res.data.email || "",
         phone: res.data.phone || "",
+        promoCode: "",
       });
     });
   }, []);
 
   const confirmOrder = () => {
-    api.post("/order").then((res) => {
+    api.post("/order", formData).then((res) => {
       console.log(res.data)
       router.push(res.data.checkoutUrl);
       // alert("Замовлення успішно оформлено!");
       // router.push("/");
+    });
+  };
+
+  const checkPromoCode = () => {
+    api.get(`/promocodes/validate?code=${formData.promoCode}`).then((res) => {
+      alert(`Промокод ${res.data.valid ? `дійсний. Знижка: ${res.data.discount * 100}%` : "недійсний"}`);
     });
   };
 
@@ -201,6 +209,26 @@ export default function CheckoutPage() {
               title="Номер телефону"
               placeholder="+380 (99) 000 - 00 - 00"
             />
+            <Input
+              value={formData.promoCode}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  promoCode: e.target.value,
+                }))
+              }
+              type="text"
+              title="Промокод"
+              placeholder="Введіть промокод"
+            />
+
+            <div
+              onClick={checkPromoCode}
+              className="bg-black text-white font-semibold rounded-md flex justify-center items-center cursor-pointer"
+            >
+              Перевірити промокод
+            </div>
+
           </form>
           <div className="mt-10">
             <h3 className="text-xl font-semibold mb-3">
@@ -256,11 +284,10 @@ export default function CheckoutPage() {
                         e.target.value.trim().length > 0
                       );
                     }}
-                    className={`${
-                      isDeliveryDetailsValid
-                        ? "border-transparent"
-                        : "border border-red-500"
-                    }`}
+                    className={`${isDeliveryDetailsValid
+                      ? "border-transparent"
+                      : "border border-red-500"
+                      }`}
                   />
                   {!isDeliveryDetailsValid && (
                     <p className="text-red-600 mt-1 text-sm">

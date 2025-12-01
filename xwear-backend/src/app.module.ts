@@ -13,9 +13,10 @@ import { OrderModule } from './order/order.module';
 import { AuthModule } from './auth/auth.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { StripeModule } from './stripe/stripe.module';
+import { PromocodesModule } from './promocodes/promocodes.module';
 
 @Module({
-  imports: [ProductsModule, PrismaModule, UsersModule, CartModule, WishlistModule, OrderModule, AuthModule, ReviewsModule, StripeModule],
+  imports: [ProductsModule, PrismaModule, UsersModule, CartModule, WishlistModule, OrderModule, AuthModule, ReviewsModule, StripeModule, PromocodesModule],
   controllers: [AppController],
   providers: [AppService, CartService, OrderService, WishlistService],
 })

@@ -81,12 +81,25 @@ model Cart {
 }
 
 model Order {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  status    String   @default("ordered")
+  id          Int    @id @default(autoincrement())
+  userId      Int
+  status      String @default("ordered")
+  promocodeId Int?
+  firstName String?
+  lastName  String?
+  phone     String?
+  company   String?
+  country   String?
+  street    String?
+  house     String?
+  city      String?
+  region    String?
+  zip       String?
+  total     Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  promocode Promocode? @relation(fields: [promocodeId], references: [id])
   user  User        @relation(fields: [userId], references: [id])
   items OrderItem[]
 }
@@ -126,4 +139,15 @@ model Review {
 
   user    User    @relation(fields: [userId], references: [id])
   product Product @relation(fields: [productId], references: [id])
+}
+
+model Promocode {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  discount  Float
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
 }
