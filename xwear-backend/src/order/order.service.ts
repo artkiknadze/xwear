@@ -21,19 +21,19 @@ export class OrderService {
 
         const order = await this.prisma.order.create({
             data: {
-                userId,
-                status: 'ordered',
-                firstName: body.firstName,
-                lastName: body.lastName,
-                phone: body.phone,
-                country: body.country,
-                region: body.region,
-                house: body.house,
-                company: body.company,
-                city: body.city,
-                street: body.street,
-                zip: body.zip,
-                total: cartItems.reduce((sum, item) => sum + item.productSize.price * (promocode.valid ? (1 - promocode.discount) : 1), 0),
+            userId,
+            status: 'ordered',
+            firstName: body.firstName,
+            lastName: body.lastName,
+            phone: body.phone,
+            country: body.country,
+            region: body.region,
+            house: body.house,
+            company: body.company,
+            city: body.city,
+            street: body.street,
+            zip: body.zip,
+            total: Math.round(cartItems.reduce((sum, item) => sum + item.productSize.price * (promocode.valid ? (1 - promocode.discount) : 1), 0) * 100) / 100,
             },
         });
 
@@ -83,33 +83,6 @@ export class OrderService {
             }
         });
 
-        const result = await Promise.all(orders.map(async (order) => {
-            const total = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            return {
-                ...order,
-                total,
-            };
-        }));
-
-        return result;
-        //     const result = await Promise.all(
-        //         orders.map(async (o) => {
-        //             const products = await Promise.all(
-        //                 o.products.map(async (productId) => {
-        //                     return this.prisma.product.findUnique({
-        //                         where: {id: productId},
-        //                     });
-        //                 }),
-        //             );
-        //             const total = products.reduce((sum, p) => sum + (p?.price || 0), 0);
-        //             return {
-        //                 ...o,
-        //                 products,
-        //                 total,
-        //             };
-        //         }),
-        //     );
-        //
-        //     return result;
+        return orders;
     }
 }
