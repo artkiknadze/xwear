@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/Input";
 import { api } from "@/utlis/axios";
 import Cookies from "js-cookie";
+import { pushDataLayer } from "@/utlis/data-layer";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,9 +33,21 @@ export default function LoginPage() {
         path: "/",
       });
 
+      pushDataLayer({
+        event: "login",
+        method: "email",
+        status: "success",
+        error_message: null,
+      });
       router.push("/dashboard");
     } else {
       setLoginError("Неправильний логін або пароль");
+      pushDataLayer({
+        event: "login",
+        method: "email",
+        status: "fail",
+        error_message: "Неправильний логін або пароль",
+      });
     }
   };
 
@@ -48,7 +61,22 @@ export default function LoginPage() {
     });
 
     if (response.status === 201) {
+      pushDataLayer({
+        event: "sign_up",
+        method: "email",
+        status: "success",
+        error_message: null,
+      });
       alert("Акаунт зареєстровано!");
+    } else {
+      const errorMsg = "Помилка реєстрації";
+      pushDataLayer({
+        event: "sign_up",
+        method: "email",
+        status: "fail",
+        error_message: errorMsg,
+      });
+      setLoginError(errorMsg);
     }
   };
 

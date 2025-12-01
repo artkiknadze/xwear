@@ -5,6 +5,7 @@ import { api } from "@/utlis/axios";
 import { faker } from "@faker-js/faker";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
+import { pushDataLayer } from "@/utlis/data-layer";
 
 const FilterBlock = ({
   title,
@@ -151,6 +152,16 @@ export default function CatalogPage() {
     });
   }, [searchParams]);
 
+  useEffect(() => {
+    const categoryName =
+      categories.find((x) => x.code === categoryParam)?.name || "Усі товари";
+
+    pushDataLayer({
+      event: "view_item_list",
+      item_list_name: categoryName,
+    });
+  }, [categoryParam]);
+
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(Array.from(searchParams!.entries()));
     if (value) {
@@ -285,9 +296,7 @@ export default function CatalogPage() {
               {categories.find((x) => x.code === categoryParam)?.name ||
                 "Усі товари"}
             </h2>
-            <span className="text-gray-500">
-              {data.length} продуктів
-            </span>
+            <span className="text-gray-500">{data.length} продуктів</span>
           </div>
 
           <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">

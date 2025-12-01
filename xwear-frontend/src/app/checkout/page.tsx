@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { api } from "@/utlis/axios";
+import { pushDataLayer } from "@/utlis/data-layer";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -53,8 +54,34 @@ export default function CheckoutPage() {
   }, []);
 
   const confirmOrder = () => {
+    const transactionId = `TXN-${Math.floor(Math.random() * 1000000)}`;
+    const promoCode = formData.promoCode?.trim() || null;
+
+    const items = cart.map((item) => ({
+      item_id: String(item.product.id),
+      item_name: item.product.title,
+      item_category: item.product.category,
+      price: item.product.price,
+      quantity: item.quantity || 1,
+    }));
+
+    const value = items.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
+
+    pushDataLayer({
+      event: "purchase",
+      transaction_id: transactionId,
+      value,
+      item_count: items.length,
+      promo_code: promoCode,
+      payment_method: paymentMethod || "not_selected",
+      ecommerce: { items },
+    });
+
     api.post("/order", formData).then((res) => {
-      console.log(res.data)
+      console.log(res.data);
       router.push(res.data.checkoutUrl);
       // alert("Замовлення успішно оформлено!");
       // router.push("/");
@@ -63,7 +90,13 @@ export default function CheckoutPage() {
 
   const checkPromoCode = () => {
     api.get(`/promocodes/validate?code=${formData.promoCode}`).then((res) => {
-      alert(`Промокод ${res.data.valid ? `дійсний. Знижка: ${res.data.discount * 100}%` : "недійсний"}`);
+      alert(
+        `Промокод ${
+          res.data.valid
+            ? `дійсний. Знижка: ${res.data.discount * 100}%`
+            : "недійсний"
+        }`
+      );
     });
   };
 
@@ -224,11 +257,10 @@ export default function CheckoutPage() {
 
             <div
               onClick={checkPromoCode}
-              className="bg-black text-white font-semibold rounded-md flex justify-center items-center cursor-pointer"
+              className="bg-black text-white font-semibold rounded-md flex justify-center items-center cursor-pointer py-2 px-3"
             >
               Перевірити промокод
             </div>
-
           </form>
           <div className="mt-10">
             <h3 className="text-xl font-semibold mb-3">
@@ -284,10 +316,11 @@ export default function CheckoutPage() {
                         e.target.value.trim().length > 0
                       );
                     }}
-                    className={`${isDeliveryDetailsValid
-                      ? "border-transparent"
-                      : "border border-red-500"
-                      }`}
+                    className={`${
+                      isDeliveryDetailsValid
+                        ? "border-transparent"
+                        : "border border-red-500"
+                    }`}
                   />
                   {!isDeliveryDetailsValid && (
                     <p className="text-red-600 mt-1 text-sm">
@@ -327,6 +360,17 @@ export default function CheckoutPage() {
                         замовлення)
                       </span>
                     </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="online"
+                        checked={paymentMethod === "online"}
+                        onChange={() => setPaymentMethod("online")}
+                        className="form-radio text-blue-600"
+                      />
+                      <span className="ml-2">Карткою онлайн</span>
+                    </label>
                   </div>
                 </div>
               </>
@@ -352,7 +396,8 @@ export default function CheckoutPage() {
                   {item.productSize.price.toLocaleString("uk-UA", {
                     style: "currency",
                     currency: "UAH",
-                  })} / {item.productSize.size} розмір
+                  })}{" "}
+                  / {item.productSize.size} розмір
                 </p>
               </div>
             </div>

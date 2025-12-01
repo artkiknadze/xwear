@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/Button";
 import { api } from "@/utlis/axios";
 import { useEffect, useState } from "react";
+import { pushDataLayer } from "@/utlis/data-layer";
 
 const ArticleItem = ({
   id,
@@ -49,8 +50,42 @@ export default function CartPage() {
   }, []);
 
   const deleteItem = (id: number) => {
+    const removed = data.cart.find((i: any) => i.id === id);
+    pushDataLayer({
+      event: "remove_from_cart",
+      ecommerce: {
+        items: [
+          {
+            item_id: String(removed.product.id),
+            item_name: removed.product.title,
+            item_category: removed.product.category,
+            price: removed.product.price,
+            quantity: removed.quantity || 1,
+          },
+        ],
+      },
+    });
     api.delete("/cart/" + id).then((res) => {
       setData(res.data);
+    });
+  };
+
+  const beginCheckout = () => {
+    const items = data.cart.map((item: any) => ({
+      item_id: String(item.product.id),
+      item_name: item.product.title,
+      item_category: item.product.category,
+      price: item.product.price,
+      quantity: item.quantity || 1,
+    }));
+
+    pushDataLayer({
+      event: "begin_checkout",
+      value: data.total,
+      item_count: items.length,
+      ecommerce: {
+        items,
+      },
     });
   };
 
@@ -75,7 +110,9 @@ export default function CartPage() {
         <p className="text-2xl font-semibold">
           Загальна сума: {data?.total} грн
         </p>
-        <Button href="/checkout">ЗАМОВИТИ</Button>
+        <div onClick={beginCheckout}>
+          <Button href="/checkout">ЗАМОВИТИ</Button>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 import { api } from "@/utlis/axios";
 import { useEffect, useState } from "react";
+import { pushDataLayer } from "@/utlis/data-layer";
 
 const ArticleItem = ({
   id,
@@ -44,6 +45,20 @@ export default function CartPage() {
   }, []);
 
   const deleteItem = (id: number) => {
+    const item = data.wishlist.find((i: any) => i.id === id);
+    pushDataLayer({
+      event: "remove_from_wishlist",
+      ecommerce: {
+        items: [
+          {
+            item_id: String(item.product.id),
+            item_name: item.product.title,
+            item_category: item.product.category,
+          },
+        ],
+      },
+    });
+
     api.delete("/wishlist/" + id).then((res) => {
       setData(res.data);
     });
@@ -51,7 +66,7 @@ export default function CartPage() {
 
   return (
     <div className="flex flex-col">
-      <h1 className="text-4xl font-bold">Список бажаного</h1>
+      <h1 className="text-4xl font-bold">Список бажань</h1>
       <div className="flex flex-col mt-6">
         {data?.wishlist.map((item: any, index: number) => (
           <ArticleItem
