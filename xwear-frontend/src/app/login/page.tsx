@@ -19,28 +19,29 @@ export default function LoginPage() {
     e.preventDefault();
     setLoginError("");
 
-    const response = await api.post("/auth/login", {
-      email: loginEmail.trim(),
-      password: loginPassword,
-    });
-
-    const { access_token } = response.data;
-    if (access_token) {
-      Cookies.set("access_token", access_token, {
-        expires: 31,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
+    try {
+      const response = await api.post("/auth/login", {
+        email: loginEmail.trim(),
+        password: loginPassword,
       });
+      const { access_token } = response.data;
+      if (access_token) {
+        Cookies.set("access_token", access_token, {
+          expires: 31,
+          secure: true,
+          sameSite: "lax",
+          path: "/",
+        });
 
-      pushDataLayer({
-        event: "login",
-        method: "email",
-        status: "success",
-        error_message: null,
-      });
-      router.push("/dashboard");
-    } else {
+        pushDataLayer({
+          event: "login",
+          method: "email",
+          status: "success",
+          error_message: null,
+        });
+        router.push("/dashboard");
+      }
+    } catch (error) {
       setLoginError("Неправильний логін або пароль");
       pushDataLayer({
         event: "login",
@@ -48,6 +49,7 @@ export default function LoginPage() {
         status: "fail",
         error_message: "Неправильний логін або пароль",
       });
+      return;
     }
   };
 
@@ -55,20 +57,22 @@ export default function LoginPage() {
     e.preventDefault();
     setLoginError("");
 
-    const response = await api.post("/auth/register", {
-      email: loginEmail.trim(),
-      password: loginPassword,
-    });
-
-    if (response.status === 201) {
-      pushDataLayer({
-        event: "sign_up",
-        method: "email",
-        status: "success",
-        error_message: null,
+    try {
+      const response = await api.post("/auth/register", {
+        email: loginEmail.trim(),
+        password: loginPassword,
       });
-      alert("Акаунт зареєстровано!");
-    } else {
+      if (response.status === 201) {
+        pushDataLayer({
+          event: "sign_up",
+          method: "email",
+          status: "success",
+          error_message: null,
+        });
+        alert("Акаунт зареєстровано!");
+        return;
+      }
+    } catch (error) {
       const errorMsg = "Помилка реєстрації";
       pushDataLayer({
         event: "sign_up",
@@ -87,21 +91,19 @@ export default function LoginPage() {
       <div className="flex justify-center mb-8">
         <button
           onClick={() => setIsLogin(true)}
-          className={`px-6 py-2 font-semibold border-b-2 ${
-            isLogin
-              ? "border-black text-black"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-6 py-2 font-semibold border-b-2 ${isLogin
+            ? "border-black text-black"
+            : "border-transparent text-gray-500"
+            }`}
         >
           Увійти
         </button>
         <button
           onClick={() => setIsLogin(false)}
-          className={`px-6 py-2 font-semibold border-b-2 ${
-            !isLogin
-              ? "border-black text-black"
-              : "border-transparent text-gray-500"
-          }`}
+          className={`px-6 py-2 font-semibold border-b-2 ${!isLogin
+            ? "border-black text-black"
+            : "border-transparent text-gray-500"
+            }`}
         >
           Зареєструватися
         </button>
@@ -112,11 +114,11 @@ export default function LoginPage() {
           {isLogin ? "ВХІД" : "РЕЄСТРАЦІЯ"}
         </h2>
 
-        {isLogin && loginError && (
+        {loginError && (
           <div className="mb-4 text-red-600">{loginError}</div>
         )}
 
-        <form onSubmit={isLogin ? handleLoginSubmit : handleRegSubmit}>
+        <div>
           <div className="flex flex-col gap-4">
             <Input
               value={loginEmail}
@@ -148,13 +150,14 @@ export default function LoginPage() {
             )}
 
             <button
-              type="submit"
+              type="button"
+              onClick={isLogin ? handleLoginSubmit : handleRegSubmit}
               className="text-center uppercase bg-black text-white font-semibold py-4 px-6 rounded-md"
             >
               {isLogin ? "Увійти" : "Зареєструватися"}
             </button>
           </div>
-        </form>
+        </div>
       </section>
     </div>
   );

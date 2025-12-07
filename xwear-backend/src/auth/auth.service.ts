@@ -11,6 +11,16 @@ export class AuthService {
   ) {}
 
   async register(email: string, password: string) {
+    if (!email || !password) {
+      throw new UnauthorizedException('email and password are required');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new UnauthorizedException('user already exists');
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prisma.user.create({
       data: {
