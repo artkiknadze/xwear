@@ -17,35 +17,6 @@ export class OrderService {
         });
 
         const promocode = await this.promocodesService.validatePromocode(body.promoCode);
-        console.log(promocode);
-
-        const order = await this.prisma.order.create({
-            data: {
-            userId,
-            status: 'ordered',
-            firstName: body.firstName,
-            lastName: body.lastName,
-            phone: body.phone,
-            country: body.country,
-            region: body.region,
-            house: body.house,
-            company: body.company,
-            city: body.city,
-            street: body.street,
-            zip: body.zip,
-            total: Math.round(cartItems.reduce((sum, item) => sum + item.productSize.price * (promocode.valid ? (1 - promocode.discount) : 1), 0) * 100) / 100,
-            },
-        });
-
-        await this.prisma.orderItem.createMany({
-            data: cartItems.map((item) => ({
-                orderId: order.id,
-                productId: item.productId,
-                productSizeId: item.productSizeId,
-                quantity: 1,
-                price: item.productSize.price,
-            })),
-        });
 
         const checkoutSession = await this.stripeService.createCheckoutSession(
             cartItems.map((item) => ({
@@ -62,6 +33,36 @@ export class OrderService {
             'http://localhost:3000/checkout/success',
             'http://localhost:3000/checkout/cancel',
         );
+
+        const order = await this.prisma.order.create({
+            data: {
+                userId,
+                status: 'ordered',
+                firstName: body.firstName,
+                lastName: body.lastName,
+                phone: body.phone,
+                country: body.country,
+                region: body.region,
+                house: body.house,
+                company: body.company,
+                city: body.city,
+                street: body.street,
+                zip: body.zip,
+                promocodeId: promocode.valid ? promocode.id : null,
+                stripeSessionId: checkoutSession.id,
+                total: Math.round(cartItems.reduce((sum, item) => sum + item.productSize.price * (promocode.valid ? (1 - promocode.discount) : 1), 0) * 100) / 100,
+            },
+        });
+
+        await this.prisma.orderItem.createMany({
+            data: cartItems.map((item) => ({
+                orderId: order.id,
+                productId: item.productId,
+                productSizeId: item.productSizeId,
+                quantity: 1,
+                price: item.productSize.price,
+            })),
+        });
 
         await this.prisma.cart.deleteMany({ where: { userId } });
         return { ...order, checkoutUrl: checkoutSession.url };

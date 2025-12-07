@@ -11,7 +11,7 @@ export class PromocodesService {
         });
 
         if (promocode) {
-            return { valid: true, discount: promocode.discount };
+            return { valid: true, discount: promocode.discount, id: promocode.id };
         } else {
             return { valid: false, discount: 0 };
         }

@@ -29,6 +29,7 @@ services:
       NODE_ENV: development
       DATABASE_URL: "postgresql://xwear_user:xwear_pw@db:5432/xwear_db?schema=public"
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
     env_file:
       - .env
     command: sh -c "npm run start:dev"

@@ -102,7 +102,7 @@ export default function DashboardPage() {
                 >
                   <td className="px-4 py-6">{order.id}</td>
                   <td className="px-4 py-6">{moment(order.createdAt).format("DD.MM.YYYY")}</td>
-                  <td className="px-4 py-6">Замовлення підтверджено</td>
+                  <td className="px-4 py-6">{order.status === 'paid' ? 'Замовлення підтверджено' : 'Очікується оплата'}</td>
                   <td className="px-4 py-6">{order.total}</td>
                 </tr>
               ))}
