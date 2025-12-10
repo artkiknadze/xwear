@@ -48,6 +48,22 @@ services:
     environment:
       NODE_ENV: development
     command: sh -c "npm run dev"
+  
+  ngrok:
+    image: ngrok/ngrok:latest
+    command:
+      - "http"
+      - "http://app:3001"
+      - "--url=${NGROK_DOMAIN}"
+    env_file:
+      - .env
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      - app
+    ports:
+      - 4040:4040
+
 
 volumes:
   db_data:
