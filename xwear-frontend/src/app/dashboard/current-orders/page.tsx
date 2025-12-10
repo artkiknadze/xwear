@@ -19,8 +19,8 @@ const Order = ({ order }: { order: any }) => {
               </span>{" "}
               — статус замовлення:
             </span>
-            <span className="text-green-600 font-semibold   p-2">
-              Замовлення підтверджено
+            <span className="text-green-600 font-semibold p-2">
+              {order.status === 'paid' ? 'Замовлення підтверджено' : 'Очікується оплата'}
             </span>
           </div>
         </div>

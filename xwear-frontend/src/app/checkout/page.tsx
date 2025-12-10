@@ -80,7 +80,7 @@ export default function CheckoutPage() {
       ecommerce: { items },
     });
 
-    api.post("/order", formData).then((res) => {
+    api.post("/order", {...formData, paymentMethod}).then((res) => {
       console.log(res.data);
       router.push(res.data.checkoutUrl);
       // alert("Замовлення успішно оформлено!");

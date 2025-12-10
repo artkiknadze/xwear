@@ -18,7 +18,7 @@ export class OrderService {
 
         const promocode = await this.promocodesService.validatePromocode(body.promoCode);
 
-        const checkoutSession = await this.stripeService.createCheckoutSession(
+        const checkoutSession = body.paymentMethod === 'online' && await this.stripeService.createCheckoutSession(
             cartItems.map((item) => ({
                 quantity: 1,
                 price_data: {
@@ -37,7 +37,7 @@ export class OrderService {
         const order = await this.prisma.order.create({
             data: {
                 userId,
-                status: 'ordered',
+                status: checkoutSession ? 'ordered' : 'paid',
                 firstName: body.firstName,
                 lastName: body.lastName,
                 phone: body.phone,
@@ -49,7 +49,7 @@ export class OrderService {
                 street: body.street,
                 zip: body.zip,
                 promocodeId: promocode.valid ? promocode.id : null,
-                stripeSessionId: checkoutSession.id,
+                stripeSessionId: checkoutSession?.id,
                 total: Math.round(cartItems.reduce((sum, item) => sum + item.productSize.price * (promocode.valid ? (1 - promocode.discount) : 1), 0) * 100) / 100,
             },
         });
@@ -65,7 +65,7 @@ export class OrderService {
         });
 
         await this.prisma.cart.deleteMany({ where: { userId } });
-        return { ...order, checkoutUrl: checkoutSession.url };
+        return { ...order, checkoutUrl: checkoutSession?.url || '/checkout/success' };
     }
 
     async findAll(userId: number) {
